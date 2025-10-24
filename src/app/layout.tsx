@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Suspense } from "react";
-import Header from "./_components/header";
+import Header from "./_components/header/header";
 import Content from "./_components/content";
 import { ThemeProvider } from "./_components/theme-provider";
 import { global_font } from "./fonts";

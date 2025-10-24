@@ -7,7 +7,10 @@ import { useTheme } from "./theme-provider";
 
 type ResultsContextType = {
   results: TestGroupResults[],
-  history: number[]
+  timestamp: number,
+  history: number[],
+  isOnline: boolean,
+  loadResults: (timestamp: number) => Promise<void>,
 }
 
 const ResultsContext = createContext<ResultsContextType | undefined>(undefined)
@@ -24,6 +27,8 @@ export function ResultsProvider({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   const [history, setHistory] = useState<number[]>([]);
   const [results, setResults] = useState<TestGroupResults[]>([]);
+  const [timestamp, setTimestamp] = useState<number>(0);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   useEffect(() => {
     refreshHistory();
@@ -34,27 +39,49 @@ export function ResultsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   function refreshHistory() {
-    getHistory().then((newHistory) => {
-      setHistory((currentHistory) => {
-        let latestTimestamp = currentHistory.length > 0 ? currentHistory[0] : 0;
-        let newLatestTimestamp = newHistory.length > 0 ? newHistory[0] : 0;
-        
-        if (newLatestTimestamp > latestTimestamp) {
-          console.log(`New test results detected: ${newLatestTimestamp} and old was ${latestTimestamp}`);
+    getHistory().then((newHistoryResult) => {
+      if (newHistoryResult.success) {
+        const newHistory = newHistoryResult.data;
+        setHistory((currentHistory) => {
+          let latestTimestamp = currentHistory.length > 0 ? currentHistory[0] : 0;
+          let newLatestTimestamp = newHistory.length > 0 ? newHistory[0] : 0;
 
-          getResults(newLatestTimestamp)
-            .then((newResults) => {
-              setResults(newResults);
-            });
-        }
-        
-        return newHistory;
-      });
+          if (newLatestTimestamp > latestTimestamp) {
+            getResults(newLatestTimestamp)
+              .then((newResultsResult) => {
+                if (newResultsResult.success) {
+                  setIsOnline(() => true);
+                  setTimestamp(newLatestTimestamp);
+                  setResults(newResultsResult.data);
+                } else {
+                  console.error('Error fetching new results:', newResultsResult.error);
+                  setIsOnline(() => false);
+                }
+              });
+            }
+          return newHistory;
+        });
+      } else {
+        console.error('Error fetching history:', newHistoryResult.error);
+        setIsOnline(() => false);
+      }
     });
+  }
+  
+  function loadResults(timestamp: number) {
+    return getResults(timestamp)
+      .then((newResultsResult) => {
+        console.log("Loaded results for timestamp:", newResultsResult);
+        if (newResultsResult.success) {
+          setIsOnline(() => true);
+          setTimestamp(timestamp);
+          setResults(newResultsResult.data);
+        }
+      });
   }
 
   return (
-    <ResultsContext.Provider value={{ results, history }}>
+    <ResultsContext.Provider value={{ results, timestamp, history, isOnline, loadResults }}>
       <ToastContainer theme={theme} />
       {children}
     </ResultsContext.Provider>

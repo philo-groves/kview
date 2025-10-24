@@ -4,7 +4,7 @@ import { readdirSync } from 'fs';
 
 export async function GET() {
   try {
-    const timestamps = getTestingDirectories(path.resolve('/kview'))
+    const timestamps = getTestingDirectories(path.resolve(process.env.BUILD_DIRECTORY || '/ktest'))
       .map(dir => Number.parseInt(dir.split('testing-')[1]))
       .sort((a, b) => b - a); // Sort timestamps in descending order
     
@@ -16,6 +16,13 @@ export async function GET() {
 }
 
 function getTestingDirectories(basePath: string): string[] {
+  // check if basePath exists
+  try {
+    readdirSync(basePath);
+  } catch (err) {
+    return [];
+  }
+
   const entries = readdirSync(basePath, { withFileTypes: true });
   const testingDirs = entries
     .filter(entry => entry.isDirectory() && entry.name.startsWith('testing-'))

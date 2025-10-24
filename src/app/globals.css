@@ -11,6 +11,7 @@
   --on-surface: #000000;
   --container: #FFFFFF;
   --on-container: #000000;
+  --container-almost: #F6F6F6;
   --container-low: #ECFAFF;
   --container-border: #EEEEEE;
   --on-container-low: #000000;
@@ -33,6 +34,7 @@
   --on-surface: #FFFFFF;
   --container: #000000;
   --on-container: #FFFFFF;
+  --container-almost: #1C1C1C;
   --container-low: #021D29;
   --container-border: #4D4D4D;
   --on-container-low: #FFFFFF;
@@ -75,6 +77,9 @@ h5 { font-size: 20px; }
 .bg-surface { background-color: var(--surface); }
 .bg-container { background-color: var(--container); }
 .bg-container-secondary { background-color: var(--container-secondary); }
+.bg-container-low { background-color: var(--container-low); }
+.bg-container-low-hover:hover { background-color: var(--container-low); }
+.bg-container-almost { background-color: var(--container-almost); }
 .bg-primary { background-color: var(--primary); }
 .bg-success { background-color: var(--success); }
 .bg-danger { background-color: var(--danger); }
@@ -89,7 +94,12 @@ h5 { font-size: 20px; }
 
 .border-t-container-1 { border-top: 1px solid var(--container-border); }
 .border-t-container-2 { border-top: 2px solid var(--container-border); }
+.border-b-container-2 { border-bottom: 2px solid var(--container-border); }
 .border-container-2 { border: 2px solid var(--container-border); }
+.border-primary { border: 2px solid var(--primary); }
+.border-success { border: 2px solid var(--success); }
+.border-danger { border: 2px solid var(--danger); }
+.border-warning { border: 2px solid var(--warning); }
 
 button:hover, select:hover {
   cursor: pointer;

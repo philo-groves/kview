@@ -6,6 +6,7 @@ import { FaThumbsUp, FaThumbsDown, FaLayerGroup } from "react-icons/fa";
 import { GrDocumentTest } from "react-icons/gr";
 import { VscSyncIgnored } from "react-icons/vsc";
 import { useResults } from "../results-provider";
+import TestDetailsModal from "./test-details-modal";
 
 export default function TestResults() {
   const { results } = useResults();

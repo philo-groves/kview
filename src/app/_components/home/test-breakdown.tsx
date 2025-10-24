@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import DropdownInput, { DropdownInputOption } from "../input/dropdown-input";
 import { useResults } from "../results-provider";
-import { group } from "console";
 import { brand_font } from "@/app/fonts";
 import { FaThumbsDown, FaThumbsUp } from "react-icons/fa";
 import { VscSyncIgnored } from "react-icons/vsc";
+import TestDetailsModal from "./test-details-modal";
 
 export default function TestBreakdown() {
   const { results } = useResults();
@@ -16,6 +16,9 @@ export default function TestBreakdown() {
 
   const [selectedTestGroups, setSelectedTestGroups] = useState<string | string[]>([]);
   const [selectedModule, setSelectedModule] = useState<string | string[]>("all");
+
+  const [selectedTest, setSelectedTest] = useState<any>({});
+  const [isTestDetailsModalOpen, setIsTestDetailsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const newTestGroups = new Set<DropdownInputOption>();
@@ -50,7 +53,8 @@ export default function TestBreakdown() {
                 module: module.module,
                 test: test.test,
                 result: test.result,
-                message: test.message
+                message: test.message,
+                location: test.location
               });
             });
           }
@@ -64,6 +68,35 @@ export default function TestBreakdown() {
     });
 
     return tests;
+  }
+
+  function hasPasses() {
+    return getFilteredTests().some(test => test.result === "pass");
+  }
+
+  function passesCount() {
+    return getFilteredTests().filter(test => test.result === "pass").length;
+  }
+
+  function hasIgnores() {
+    return getFilteredTests().some(test => test.result === "ignore");
+  }
+
+  function ignoresCount() {
+    return getFilteredTests().filter(test => test.result === "ignore").length;
+  }
+
+  function hasFailures() {
+    return getFilteredTests().some(test => test.result === "fail");
+  }
+
+  function failuresCount() {
+    return getFilteredTests().filter(test => test.result === "fail").length;
+  }
+
+  function handleTestClick(test: TestResult) {
+    setSelectedTest(test);
+    setIsTestDetailsModalOpen(true);
   }
 
   return (
@@ -92,35 +125,45 @@ export default function TestBreakdown() {
         </div>
 
         <div className="h-full bg-container border-container-2 col-span-4 rounded-lg overflow-hidden">
-          <h5 className="p-3">Tests</h5>
-          <div className="w-full h-full border-t-container-1 overflow-auto test-list">
+          <div className="p-3">
+            <div className="flex flex-row justify-between items-center gap-3">
+              <h5>Tests</h5>
+              <div className="flex flex-row gap-2">
+                <span className="text-xs bg-container-almost border-primary px-2 py-1 rounded-full">{getFilteredTests().length}</span>
+                {hasPasses() && <span className="text-xs bg-container-almost border-success px-2 py-1 rounded-full">{passesCount()}</span>}
+                {hasIgnores() && <span className="text-xs bg-container-almost border-warning px-2 py-1 rounded-full">{ignoresCount()}</span>}
+                {hasFailures() && <span className="text-xs bg-container-almost border-danger px-2 py-1 rounded-full">{failuresCount()}</span>}
+              </div>
+            </div>
+          </div>
+          <div className="w-full h-full border-t-container-2 overflow-auto test-list">
             {getFilteredTests().map((test, index) => 
-              <div key={index} className="px-3 py-1 border-t-container-1 last:border-0 flex flex-row gap-3 items-center justify-between">
+              <div key={index} onClick={() => handleTestClick(test)} className={`px-3 py-1 border-b-container-2 cursor-pointer bg-container-low-hover last:border-0 flex flex-row gap-3 items-center justify-between ${index % 2 === 1 ? 'bg-container-almost' : ''}`}>
                 <div className="min-w-[150px]">
                   <div className="text-sm">
-                    <span className="rounded-xl border-container-2 px-2 py-0.5 ellipsis">{test.group}</span>
+                    <span className={`bg-container ${index % 2 === 0 ? 'bg-container-almost' : ''} px-2 py-0.5 ellipsis`}>{test.group}</span>
                   </div>
                 </div>
                 <div className="grow">
-                  <div className={`mt-1 text-xs ${brand_font.className}`}>{test.module}</div>
-                  <div className={`-mt-0.5 w-full ${brand_font.className}`}>{test.test}</div>
+                  <div className={`text-xs ${brand_font.className}`}>{test.module}</div>
+                  <div className={`text-sm w-full ${brand_font.className}`}>{test.test}</div>
                 </div>
                 
                 {test.result === "pass" && (
                   <div className="bg-success text-container px-2 py-1 rounded-xl flex flex-row items-center gap-1">
-                    <FaThumbsUp />
+                    <FaThumbsUp size={13} />
                     <span className="text-container text-xs px-1">PASS</span>
                   </div>
                 )}
                 {test.result === "ignore" && (
                   <div className="bg-warning text-container px-2 py-1 rounded-xl flex flex-row items-center gap-1">
-                    <VscSyncIgnored />
+                    <VscSyncIgnored size={13} />
                     <span className="text-container text-xs px-1">IGNORE</span>
                   </div>
                 )}
                 {test.result === "fail" && (
                   <div className="bg-danger text-container px-2 py-1 rounded-xl flex flex-row items-center gap-1">
-                    <FaThumbsDown />
+                    <FaThumbsDown size={13} />
                     <span className="text-container text-xs px-1">FAIL</span>
                   </div>
                 )}
@@ -129,6 +172,12 @@ export default function TestBreakdown() {
           </div>
         </div>
       </div>
+      <TestDetailsModal
+        test={selectedTest}
+        title="Test Details"
+        isOpen={isTestDetailsModalOpen}
+        onClose={() => setIsTestDetailsModalOpen(false)}
+      />
     </div>
   );
 }
@@ -139,4 +188,5 @@ type TestResult = {
   test: string;
   result: string;
   message?: string;
+  location?: string;
 }
