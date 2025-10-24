@@ -4,7 +4,7 @@ import { readdirSync } from 'fs';
 
 export async function GET() {
   try {
-    const timestamps = getTestingDirectories(path.resolve(process.env.BUILD_DIRECTORY || '/ktest'))
+    const timestamps = getTestingDirectories(path.resolve(process.env.BUILD_DIRECTORY || '/kview'))
       .map(dir => Number.parseInt(dir.split('testing-')[1]))
       .sort((a, b) => b - a); // Sort timestamps in descending order
     

@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     let { searchParams } = new URL(request.url);
     const timestampParam = searchParams.get('timestamp');
 
-    let testing_directory = `${process.env.BUILD_DIRECTORY || '/ktest'}/testing-${timestampParam}`;
+    let testing_directory = `${process.env.BUILD_DIRECTORY || '/kview'}/testing-${timestampParam}`;
     const files = getAllFilesInDirectory(path.resolve(testing_directory));
     const results = await Promise.all(files.map(async (file) => {
       const fileData = await readFile(file, 'utf-8');

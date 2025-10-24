@@ -19,8 +19,8 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Set environment variables for Next.js in production
-ENV NODE_ENV production
-ENV PORT 3000
+ENV NODE_ENV=production
+ENV PORT=3000
 
 # Copy only necessary files from the builder stage
 COPY --from=builder /app/.next ./.next
